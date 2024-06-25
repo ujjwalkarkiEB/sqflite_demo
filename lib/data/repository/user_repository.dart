@@ -9,25 +9,21 @@ class UserRepository {
 
   final DatabaseServiceImpl _dbService = DatabaseServiceImpl.instance;
 
-  Future<List<User>> getAllUsers() async {
-    try {
-      return await _dbService.getAllUsers();
-    } catch (e) {
-      print('Error fetching users: $e');
-      return [];
-    }
-  }
-
   Future<void> addUser(User user) async {
     await _dbService.addUser(user);
   }
 
-  Future<void> deleteUser(int userId) async {
-    await _dbService.deleteUser(userId);
+  Future<void> deleteUser(User user) async {
+    await _dbService.deleteUser(user);
   }
 
-  Future<void> updateUser(
-      int userId, Map<String, dynamic> fieldsToUpdate) async {
-    await _dbService.updateUser(userId, fieldsToUpdate);
+  Future<void> updateUser(User user, {String? name, int? age}) async {
+    if (name != null) {
+      user.name = name;
+    }
+    if (age != null) {
+      user.age = age;
+    }
+    await _dbService.updateUser(user);
   }
 }

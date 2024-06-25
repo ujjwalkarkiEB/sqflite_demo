@@ -1,15 +1,15 @@
-class User {
-  final int? userId;
-  final String name;
-  final int age;
+import 'package:hive/hive.dart';
+part 'user.g.dart';
 
-  User({required this.name, required this.age, this.userId});
+@HiveType(typeId: 0)
+class User extends HiveObject {
+  User({
+    required this.name,
+    required this.age,
+  });
 
-  User copyWith({int? userId, String? name, int? age}) {
-    return User(
-      userId: userId ?? this.userId,
-      name: name ?? this.name,
-      age: age ?? this.age,
-    );
-  }
+  @HiveField(1)
+  late String name;
+  @HiveField(2)
+  late int age;
 }

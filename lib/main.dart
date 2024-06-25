@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sqflite_demo/data/source/local/database/database_helper.dart';
 
 import 'presentation/screens/home_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DatabaseHelper.instance.initializeDatabase();
   runApp(const MyApp());
 }
 
@@ -17,7 +20,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const HomeScreen(title: 'Flutter Demo Home Page'),
+      home: const HomeScreen(title: 'Hive Demo'),
     );
   }
 }

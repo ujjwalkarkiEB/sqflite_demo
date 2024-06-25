@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sqflite_demo/data/repository/user_repository.dart';
-import 'package:flutter_sqflite_demo/data/source/local/database/database_service_impl.dart';
+import 'package:flutter_sqflite_demo/data/source/local/database/database_helper.dart';
 import 'package:flutter_sqflite_demo/utils/constants/db_constants.dart';
 import 'package:flutter_sqflite_demo/data/model/user.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.title});
@@ -16,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final userRepository = UserRepository.instance;
 
-  Future<void> _showUpdateDialog(int userId) async {
+  Future<void> _showUpdateDialog(User user) async {
     String? name;
     int? age;
     await showDialog(
@@ -49,15 +50,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: () async {
                           final Map<String, dynamic> fieldToUpdate = {};
                           if (name != null) {
-                            fieldToUpdate[DbConstants.tableUserNameColumnName] =
-                                name;
+                            user.name = name!;
                           }
 
                           if (age != null) {
                             fieldToUpdate[DbConstants.tableAgeColumnName] = age;
                           }
-                          await userRepository.updateUser(
-                              userId, fieldToUpdate);
+                          await userRepository.updateUser(user);
                           if (!context.mounted) {
                             return;
                           }
@@ -101,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 onChanged: (value) {
                   name = value;
-                  print('name: $name');
                 },
               ),
               TextField(
@@ -111,14 +109,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   age = int.tryParse(value);
-                  print('age: $age');
                 },
               ),
               ElevatedButton(
                 child: const Text('Add'),
                 onPressed: () async {
-                  print('age: $age');
-                  print('name: $name');
                   if (name != null && age != null) {
                     await userRepository.addUser(User(name: name!, age: age!));
                     if (!context.mounted) {
@@ -147,54 +142,35 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Expanded(
-              child: FutureBuilder<List<User>>(
-                  future: userRepository.getAllUsers(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    }
-
-                    if (snapshot.hasError) {
-                      return const Center(
-                        child: Text('Error in fetching data!'),
-                      );
-                    }
-
-                    if (snapshot.hasData) {
-                      final users = snapshot.data;
-                      return users!.isEmpty
-                          ? const Center(
-                              child: Text('No users have been added yet!'),
-                            )
-                          : ListView.builder(
-                              itemCount: users.length,
-                              itemBuilder: (context, index) {
-                                final user = users[index];
-                                return Dismissible(
-                                  key: ValueKey(users[index].userId),
-                                  child: ListTile(
-                                    title: Text(user.name),
-                                    subtitle: Text('Age: ${user.age}'),
-                                    trailing: IconButton(
-                                        onPressed: () async {
-                                          await _showUpdateDialog(user.userId!);
-                                          setState(() {});
-                                        },
-                                        icon: const Icon(Icons.edit_square)),
-                                  ),
-                                  onDismissed: (direction) async {
-                                    await userRepository
-                                        .deleteUser(user.userId!);
-
-                                    setState(() {});
-                                  },
-                                );
-                              },
-                            );
-                    }
-                    return const Center(
-                      child: Text('Something went wrong!'),
-                    );
+              child: ValueListenableBuilder<Box<User>>(
+                  valueListenable: DatabaseHelper.instance.userBox.listenable(),
+                  builder: (context, box, _) {
+                    final users = box.values.toList().cast<User>();
+                    return users.isEmpty
+                        ? const Center(
+                            child: Text('No users have been added yet!'),
+                          )
+                        : ListView.builder(
+                            itemCount: box.length,
+                            itemBuilder: (context, index) {
+                              final user = users[index];
+                              return Dismissible(
+                                key: ValueKey(user),
+                                child: ListTile(
+                                  title: Text(user.name),
+                                  subtitle: Text('Age: ${user.age}'),
+                                  trailing: IconButton(
+                                      onPressed: () async {
+                                        await _showUpdateDialog(user);
+                                      },
+                                      icon: const Icon(Icons.edit_square)),
+                                ),
+                                onDismissed: (direction) async {
+                                  await userRepository.deleteUser(user);
+                                },
+                              );
+                            },
+                          );
                   }),
             ),
           ],
@@ -203,7 +179,6 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await _showAddItemModal();
-          setState(() {});
         },
         tooltip: 'Add Item',
         child: const Icon(Icons.add),

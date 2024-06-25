@@ -15,75 +15,38 @@ class DatabaseServiceImpl implements DatabaseService {
 
   @override
   Future<Database> get database async {
-    return await _databaseHelper.database;
+    throw UnimplementedError();
   }
 
   @override
   Future<List<User>> getAllUsers() async {
-    try {
-      final db = await database;
-      final List<Map<String, dynamic>> users =
-          await db.query(DbConstants.tableName);
-      return List.generate(
-        users.length,
-        (index) {
-          return User(
-            userId: users[index][DbConstants.tableIDColumnName],
-            name: users[index][DbConstants.tableUserNameColumnName],
-            age: users[index][DbConstants.tableAgeColumnName],
-          );
-        },
-      );
-    } catch (e) {
-      print('get all users error: ${e.toString()}');
-      return [];
-    }
+    throw UnimplementedError();
   }
 
   @override
   Future<void> addUser(User user) async {
-    final db = await database;
     try {
-      final id = await db.insert(
-        DbConstants.tableName,
-        {
-          DbConstants.tableIDColumnName: user.userId,
-          DbConstants.tableUserNameColumnName: user.name,
-          DbConstants.tableAgeColumnName: user.age,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-      print('Added user with id: $id');
+      final box = _databaseHelper.userBox;
+      await box.add(user);
+      await user.save();
     } catch (e) {
       print('insertion error: ${e.toString()}');
     }
   }
 
   @override
-  Future<void> deleteUser(int userId) async {
-    final db = await database;
+  Future<void> deleteUser(User user) async {
     try {
-      await db.delete(
-        DbConstants.tableName,
-        where: '${DbConstants.tableIDColumnName} = ?',
-        whereArgs: [userId],
-      );
+      await user.delete();
     } catch (e) {
       print('deletion error: ${e.toString()}');
     }
   }
 
   @override
-  Future<void> updateUser(
-      int userId, Map<String, dynamic> fieldsToUpdate) async {
-    final db = await database;
+  Future<void> updateUser(User user) async {
     try {
-      await db.update(
-        DbConstants.tableName,
-        fieldsToUpdate,
-        where: '${DbConstants.tableIDColumnName} = ?',
-        whereArgs: [userId],
-      );
+      await user.save();
     } catch (e) {
       print('update error: ${e.toString()}');
     }
