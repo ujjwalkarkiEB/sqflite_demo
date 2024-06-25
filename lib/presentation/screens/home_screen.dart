@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sqflite_demo/data/repository/user_repository.dart';
-import 'package:flutter_sqflite_demo/data/source/local/database/database_service_impl.dart';
 import 'package:flutter_sqflite_demo/utils/constants/db_constants.dart';
 import 'package:flutter_sqflite_demo/data/model/user.dart';
 
@@ -86,49 +85,52 @@ class _HomeScreenState extends State<HomeScreen> {
       isScrollControlled: true,
       context: context,
       builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 20,
-              right: 20,
-              top: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Name',
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 20,
+                right: 20,
+                top: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                  ),
+                  onChanged: (value) {
+                    name = value;
+                    print('name: $name');
+                  },
                 ),
-                onChanged: (value) {
-                  name = value;
-                  print('name: $name');
-                },
-              ),
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Age',
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Age',
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    age = int.tryParse(value);
+                    print('age: $age');
+                  },
                 ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  age = int.tryParse(value);
-                  print('age: $age');
-                },
-              ),
-              ElevatedButton(
-                child: const Text('Add'),
-                onPressed: () async {
-                  print('age: $age');
-                  print('name: $name');
-                  if (name != null && age != null) {
-                    await userRepository.addUser(User(name: name!, age: age!));
-                    if (!context.mounted) {
-                      return;
+                ElevatedButton(
+                  child: const Text('Add'),
+                  onPressed: () async {
+                    print('age: $age');
+                    print('name: $name');
+                    if (name != null && age != null) {
+                      await userRepository
+                          .addUser(User(name: name!, age: age!));
+                      if (!context.mounted) {
+                        return;
+                      }
+                      Navigator.pop(context);
                     }
-                    Navigator.pop(context);
-                  }
-                },
-              ),
-            ],
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },
