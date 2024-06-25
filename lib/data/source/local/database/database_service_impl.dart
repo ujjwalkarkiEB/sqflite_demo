@@ -1,4 +1,3 @@
-import 'package:flutter_sqflite_demo/utils/constants/db_constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../model/user.dart';
