@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sqflite_demo/data/repository/user_repository.dart';
 import 'package:flutter_sqflite_demo/data/source/local/database/database_helper.dart';
-import 'package:flutter_sqflite_demo/utils/constants/db_constants.dart';
 import 'package:flutter_sqflite_demo/data/model/user.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -47,19 +46,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   children: [
                     ElevatedButton(
-                        onPressed: () async {
-                          final Map<String, dynamic> fieldToUpdate = {};
-                          if (name != null) {
-                            user.name = name!;
-                          }
+                        onPressed: () {
+                          userRepository.updateUser(user, name: name, age: age);
 
-                          if (age != null) {
-                            fieldToUpdate[DbConstants.tableAgeColumnName] = age;
-                          }
-                          await userRepository.updateUser(user);
-                          if (!context.mounted) {
-                            return;
-                          }
                           Navigator.of(context).pop();
                         },
                         child: const Text('Update')),
