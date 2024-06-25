@@ -20,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String? name;
     int? age;
     await showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -52,6 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.of(context).pop();
                         },
                         child: const Text('Update')),
+                    const SizedBox(
+                      width: 20,
+                    ),
                     ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
@@ -74,45 +78,48 @@ class _HomeScreenState extends State<HomeScreen> {
       isScrollControlled: true,
       context: context,
       builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 20,
-              right: 20,
-              top: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Name',
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 20,
+                right: 20,
+                top: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                  ),
+                  onChanged: (value) {
+                    name = value;
+                  },
                 ),
-                onChanged: (value) {
-                  name = value;
-                },
-              ),
-              TextField(
-                decoration: const InputDecoration(
-                  labelText: 'Age',
+                TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Age',
+                  ),
+                  keyboardType: TextInputType.number,
+                  onChanged: (value) {
+                    age = int.tryParse(value);
+                  },
                 ),
-                keyboardType: TextInputType.number,
-                onChanged: (value) {
-                  age = int.tryParse(value);
-                },
-              ),
-              ElevatedButton(
-                child: const Text('Add'),
-                onPressed: () async {
-                  if (name != null && age != null) {
-                    await userRepository.addUser(User(name: name!, age: age!));
-                    if (!context.mounted) {
-                      return;
+                ElevatedButton(
+                  child: const Text('Add'),
+                  onPressed: () async {
+                    if (name != null && age != null) {
+                      await userRepository
+                          .addUser(User(name: name!, age: age!));
+                      if (!context.mounted) {
+                        return;
+                      }
+                      Navigator.pop(context);
                     }
-                    Navigator.pop(context);
-                  }
-                },
-              ),
-            ],
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },
