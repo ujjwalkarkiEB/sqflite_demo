@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sqflite_demo/constants/db_constants.dart';
-import 'package:flutter_sqflite_demo/model/user.dart';
-import 'package:flutter_sqflite_demo/services/database_services.dart';
+import 'package:flutter_sqflite_demo/data/repository/user_repository.dart';
+import 'package:flutter_sqflite_demo/data/source/local/database/database_service_impl.dart';
+import 'package:flutter_sqflite_demo/utils/constants/db_constants.dart';
+import 'package:flutter_sqflite_demo/data/model/user.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.title});
@@ -13,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final dbService = DatabaseService.instance;
+  final userRepository = UserRepository.instance;
 
   Future<void> _showUpdateDialog(int userId) async {
     String? name;
@@ -55,7 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (age != null) {
                             fieldToUpdate[DbConstants.tableAgeColumnName] = age;
                           }
-                          await dbService.updateUser(userId, fieldToUpdate);
+                          await userRepository.updateUser(
+                              userId, fieldToUpdate);
                           if (!context.mounted) {
                             return;
                           }
@@ -118,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   print('age: $age');
                   print('name: $name');
                   if (name != null && age != null) {
-                    await dbService.addUser(User(name: name!, age: age!));
+                    await userRepository.addUser(User(name: name!, age: age!));
                     if (!context.mounted) {
                       return;
                     }
@@ -146,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: <Widget>[
             Expanded(
               child: FutureBuilder<List<User>>(
-                  future: dbService.getAllUsers(),
+                  future: userRepository.getAllUsers(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
@@ -181,7 +183,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         icon: const Icon(Icons.edit_square)),
                                   ),
                                   onDismissed: (direction) async {
-                                    await dbService.deleteUser(user.userId!);
+                                    await userRepository
+                                        .deleteUser(user.userId!);
 
                                     setState(() {});
                                   },

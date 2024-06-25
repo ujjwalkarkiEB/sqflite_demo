@@ -12,20 +12,4 @@ class User {
       age: age ?? this.age,
     );
   }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'userId': userId,
-      'name': name,
-      'age': age,
-    };
-  }
-
-  static User fromMap(Map<String, dynamic> map) {
-    return User(
-      userId: map['userId'],
-      name: map['name'],
-      age: map['age'],
-    );
-  }
 }
