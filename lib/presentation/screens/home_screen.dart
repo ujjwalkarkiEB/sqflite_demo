@@ -19,10 +19,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _showUpdateDialog(User user) async {
     String? name;
     int? age;
-    await showDialog(
+    await showGeneralDialog(
       barrierDismissible: false,
+      transitionDuration: const Duration(milliseconds: 300),
       context: context,
-      builder: (context) {
+      pageBuilder: (context, _, __) {
         return AlertDialog(
           title: const Text('Update User'),
           content: SingleChildScrollView(
