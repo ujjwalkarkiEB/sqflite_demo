@@ -76,6 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
     int? age;
     await showModalBottomSheet(
       isScrollControlled: true,
+      barrierColor: Colors.purple.withOpacity(0.2),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
       context: context,
       builder: (BuildContext context) {
         return SafeArea(
@@ -134,42 +136,51 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
-              child: ValueListenableBuilder<Box<User>>(
-                  valueListenable: DatabaseHelper.instance.userBox.listenable(),
-                  builder: (context, box, _) {
-                    final users = box.values.toList().cast<User>();
-                    return users.isEmpty
-                        ? const Center(
-                            child: Text('No users have been added yet!'),
-                          )
-                        : ListView.builder(
-                            itemCount: box.length,
-                            itemBuilder: (context, index) {
-                              final user = users[index];
-                              return Dismissible(
-                                key: ValueKey(user),
-                                child: ListTile(
-                                  title: Text(user.name),
-                                  subtitle: Text('Age: ${user.age}'),
-                                  trailing: IconButton(
-                                      onPressed: () async {
-                                        await _showUpdateDialog(user);
-                                      },
-                                      icon: const Icon(Icons.edit_square)),
-                                ),
-                                onDismissed: (direction) async {
-                                  await userRepository.deleteUser(user);
-                                },
-                              );
-                            },
-                          );
-                  }),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Expanded(
+                child: ValueListenableBuilder<Box<User>>(
+                    valueListenable:
+                        DatabaseHelper.instance.userBox.listenable(),
+                    builder: (context, box, _) {
+                      final users = box.values.toList().cast<User>();
+                      return users.isEmpty
+                          ? const Center(
+                              child: Text('No users have been added yet!'),
+                            )
+                          : ListView.separated(
+                              itemCount: box.length,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(
+                                height: 10,
+                              ),
+                              itemBuilder: (context, index) {
+                                final user = users[index];
+                                return Dismissible(
+                                  key: ValueKey(user),
+                                  child: ListTile(
+                                    tileColor: Colors.grey.withOpacity(0.3),
+                                    title: Text(user.name.toUpperCase()),
+                                    subtitle: Text('Age: ${user.age}'),
+                                    trailing: IconButton(
+                                        onPressed: () async {
+                                          await _showUpdateDialog(user);
+                                        },
+                                        icon: const Icon(Icons.edit_square)),
+                                  ),
+                                  onDismissed: (direction) async {
+                                    await userRepository.deleteUser(user);
+                                  },
+                                );
+                              },
+                            );
+                    }),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
